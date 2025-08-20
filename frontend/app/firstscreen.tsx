@@ -13,7 +13,7 @@ export default function FirstScreen() {
     const router = useRouter();
         useEffect(() => {
         const timer = setTimeout(() => {
-            router.replace("/(auth)/login");
+            router.replace("/auth/login");
         }, 3000);
     
         return () => clearTimeout(timer);
