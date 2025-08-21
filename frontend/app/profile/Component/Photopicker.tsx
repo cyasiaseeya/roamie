@@ -1,4 +1,3 @@
-// component/photopicker.ts
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 

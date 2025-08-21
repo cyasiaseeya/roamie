@@ -1,179 +1,193 @@
-import React from "react";
-import { StyleSheet, View, Text, Image, TextInput, TouchableOpacity, SafeAreaView } from "react-native";
+import * as React from "react";
+import { Image, StyleSheet, Text, View, TouchableOpacity, SafeAreaView } from "react-native";
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from "expo-router";
+import { GoogleIcon, KakaoIcon } from "../../component/Icons";
 import { scaleW, scaleH, font } from "../../utils/scale";
-import { router, useRouter } from 'expo-router';
-const GLOBE_IMAGE = require("../../assets/images/earth.png"); // 파일명/경로만 맞게!
 
-export default function LoginScreen() {
+const Component = () => {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.innerWrap}>
-        {/* 지구본 */}
-        <Image
-          source={GLOBE_IMAGE}
-          style={styles.globe}
-          resizeMode="contain"
+    <SafeAreaView style={styles.view}>
+      {/* 그라데이션 배경 */}
+      <LinearGradient
+        colors={['#2567E8', '#0CEC80']}
+        locations={[0.3, 1]}
+        style={styles.gradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      />
+      
+      <View style={styles.view1}>
+        {/* 지구본 이미지 */}
+        <Image 
+          style={styles.dEarthPng} 
+          resizeMode="cover" 
+          source={require("../../assets/images/earth.png")} 
         />
-        {/* 로그인 카드 */}
-        <View style={styles.card}>
-          <Text style={styles.title}>로그인</Text>
-          {/* 이메일 입력 */}
-          <View style={styles.inputWrap}>
-            <Text style={styles.label}>아이디</Text>
-            <TextInput
-              placeholder="아이디를 입력하세요"
-              placeholderTextColor="#9DA3AE"
-              style={styles.input}
-              autoCapitalize="none"
-            />
-          </View>
-          {/* 비밀번호 입력 */}
-          <View style={styles.inputWrap}>
-            <Text style={styles.label}>비밀번호</Text>
-            <TextInput
-              placeholder="비밀번호를 입력하세요"
-              placeholderTextColor="#9DA3AE"
-              secureTextEntry
-              style={styles.input}
-            />
-          </View>
-          {/* 아이디 기억/비밀번호 찾기 */}
-          <View style={styles.row}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View style={styles.checkbox} />
-              <Text style={styles.checkboxLabel}>아이디 기억하기</Text>
+        
+        {/* Roamie 타이틀 */}
+        <Text style={styles.roamie}>Roamie</Text>
+        
+        {/* 카카오 로그인 버튼 */}
+        <View style={styles.child}>
+          <TouchableOpacity 
+            onPress={() => router.push("/auth/register")}
+            style={styles.anotherStepLoginWrapper}
+            activeOpacity={0.8}
+          >
+            <View style={styles.view2}>
+              <View style={styles.googleIcon}>
+                <KakaoIcon size={scaleW(18)} />
+              </View>
+              <View style={styles.container1}>
+                <Text style={styles.label}>카카오로 시작하기</Text>
+              </View>
             </View>
-            <TouchableOpacity>
-              <Text style={styles.link}>비밀번호 찾기</Text>
-            </TouchableOpacity>
-          </View>
-          {/* 로그인 버튼 */}
-          <TouchableOpacity style={styles.loginBtn}>
-            <Text style={styles.loginBtnText}>로그인</Text>
           </TouchableOpacity>
-          {/* 회원가입 안내 */}
-          <View style={styles.signupRow}>
-            <Text style={styles.signupText}>계정이 없나요?</Text>
-            <TouchableOpacity onPress={() => router.push('/auth/register')}>
-              <Text style={styles.signupLink}> 회원가입</Text>
-            </TouchableOpacity>
-          </View>
+        </View>
+        
+        {/* 구글 로그인 버튼 */}
+        <View style={styles.inner}>
+          <TouchableOpacity 
+            onPress={() => router.push("/auth/register")}
+            style={styles.anotherStepLoginWrapper}
+            activeOpacity={0.8}
+          >
+            <View style={styles.anotherStepLogin}>
+              <View style={styles.googleIcon}>
+                <GoogleIcon size={scaleW(18)} />
+              </View>
+              <View style={styles.containerPosition}>
+                <Text style={styles.label}>구글로 시작하기</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#007aff",
-    alignItems: "center",
+  view: {
+    flex: 1
   },
-  innerWrap: {
-    width: "100%",
-    maxWidth: scaleW(360),
-    flex: 1,
-    alignItems: "center",
-    backgroundColor: "#007aff",
+  gradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
   },
-  globe: {
-    width: scaleW(360),
-    height: scaleH(350),
-    marginTop: scaleH(-10),
-    marginBottom: scaleH(-160), // 카드가 위로 파고들도록 음수!
-    zIndex: 1,
+  dEarthPng: {
+    position: "absolute",
+    left: "50%",
+    marginLeft: scaleW(-100),
+    top: scaleH(119),
+    width: scaleW(200),
+    height: scaleH(150)
   },
-  card: {
-    width: scaleW(326),// ← Figma와 동일 폭
-    height: scaleH(428),
-    alignSelf: 'center',
-    backgroundColor: '#fff',
-    borderRadius: scaleW(24),
-    paddingHorizontal: scaleW(20),
-    paddingTop: scaleH(36),     // 지구본과 겹쳤을 때 컨텐츠가 너무 위로 붙지 않게
-    paddingBottom: scaleH(24),
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    zIndex: 2,
-  },
-  title: {
-    fontSize: font(26),
-    fontWeight: "800",
-    color: "#1F2937",
+  roamie: {
+    position: "absolute",
+    left: "50%",
+    marginLeft: scaleW(-176),
+    top: scaleH(306),
+    fontSize: font(48),
+    lineHeight: font(56),
+    fontWeight: "700",
+    color: "#FFFFFF",
     textAlign: "center",
-    marginBottom: scaleH(18),
+    width: scaleW(352),
+    fontFamily: "Pretendard"
   },
-  inputWrap: {
-    marginBottom: scaleH(16),
+  inner: {
+    position: "absolute",
+    width: scaleW(300),
+    marginLeft: scaleW(-150),
+    left: "50%",
+    top: scaleH(462)
+  },
+  child: {
+    position: "absolute",
+    width: scaleW(300),
+    marginLeft: scaleW(-150),
+    left: "50%",
+    top: scaleH(385)
+  },
+  anotherStepLoginWrapper: {
+    height: scaleH(48),
+    width: scaleW(300)
+  },
+  anotherStepLogin: {
+    borderRadius: scaleW(10),
+    top: 0,
+    left: 0,
+    height: scaleH(48),
+    width: scaleW(300),
+    position: "absolute",
+    overflow: "hidden",
+    backgroundColor: "#FFFFFF",
+    borderStyle: "solid",
+    borderColor: "#EFF0F6",
+    borderWidth: 1
+  },
+  view2: {
+    borderRadius: scaleW(10),
+    top: 0,
+    left: 0,
+    height: scaleH(48),
+    width: scaleW(300),
+    position: "absolute",
+    overflow: "hidden",
+    backgroundColor: "#FEE500"
+  },
+  googleIcon: {
+    top: scaleH(15),
+    left: scaleW(14),
+    width: scaleW(18),
+    height: scaleH(18),
+    position: "absolute",
+    overflow: "hidden"
+  },
+  containerPosition: {
+    paddingVertical: 0,
+    paddingHorizontal: scaleW(86),
+    justifyContent: "center",
+    marginLeft: scaleW(-136),
+    alignItems: "center",
+    flexDirection: "row",
+    top: scaleH(12),
+    left: "50%",
+    position: "absolute",
+    overflow: "hidden"
+  },
+  container1: {
+    paddingVertical: 0,
+    paddingHorizontal: scaleW(86),
+    justifyContent: "center",
+    marginLeft: scaleW(-136),
+    alignItems: "center",
+    flexDirection: "row",
+    top: scaleH(12),
+    left: "50%",
+    position: "absolute",
+    overflow: "hidden",
+    width: scaleW(271)
   },
   label: {
-    fontSize: font(13),
-    color: "#374151",
-    marginBottom: scaleH(6),
-  },
-  input: {
-    height: scaleH(44),
-    borderRadius: scaleW(10),
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    paddingHorizontal: scaleW(14),
-    backgroundColor: "#F9FAFB",
     fontSize: font(15),
+    lineHeight: font(23),
+    fontWeight: "500",
+    color: "#333333",
+    textAlign: "center",
+    fontFamily: "Pretendard"
   },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: scaleH(4),
-    marginBottom: scaleH(10),
-  },
-  checkbox: {
-    width: scaleW(18),
-    height: scaleW(18),
-    borderRadius: scaleW(4),
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    marginRight: scaleW(8),
-    backgroundColor: "#fff",
-  },
-  checkboxLabel: {
-    fontSize: font(12),
-    color: "#6B7280",
-  },
-  link: {
-    fontSize: font(12),
-    color: "#2B84FF",
-    fontWeight: "600",
-  },
-  loginBtn: {
-    height: scaleH(48),
-    backgroundColor: "#2B84FF",
-    borderRadius: scaleW(12),
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: scaleH(6),
-  },
-  loginBtnText: {
-    fontSize: font(15),
-    color: "#fff",
-    fontWeight: "800",
-  },
-  signupRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: scaleH(12),
-  },
-  signupText: {
-    fontSize: font(12),
-    color: "#6B7280",
-  },
-  signupLink: {
-    fontSize: font(12),
-    color: "#2B84FF",
-    fontWeight: "700",
-  },
+  view1: {
+    width: "100%",
+    height: "100%",
+    overflow: "hidden",
+    flex: 1
+  }
 });
+
+export default Component;
