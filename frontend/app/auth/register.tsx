@@ -54,6 +54,8 @@ const Component = () => {
   const onSubmit = () => {
     // TODO: 실제 회원가입 핸들러 연결
     console.log({nickname, gender, birthDate});
+    // 프로필 사진 선택 페이지로 이동
+    router.push("/profile/ProfilePhotoScreen");
   };
 
   return (

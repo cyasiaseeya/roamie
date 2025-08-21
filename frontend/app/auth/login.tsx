@@ -29,22 +29,14 @@ const Component = () => {
         <Text style={styles.roamie}>Roamie</Text>
         
         {/* 카카오 로그인 버튼 */}
-        <View style={styles.child}>
-          <TouchableOpacity 
-            onPress={() => router.push("/auth/register")}
-            style={styles.anotherStepLoginWrapper}
-            activeOpacity={0.8}
-          >
-            <View style={styles.view2}>
-              <View style={styles.googleIcon}>
-                <KakaoIcon size={scaleW(18)} />
-              </View>
-              <View style={styles.container1}>
-                <Text style={styles.label}>카카오로 시작하기</Text>
-              </View>
+        <TouchableOpacity style={styles.child} onPress={() => router.push("/auth/register")} activeOpacity={0.8}>
+          <View style={styles.view2}>
+            <View style={styles.googleIcon}>
+              <KakaoIcon size={scaleW(18)} />
             </View>
-          </TouchableOpacity>
-        </View>
+            <Text style={[styles.label, { position: 'absolute', left: '50%', marginLeft: scaleW(-50), top: scaleH(12) }]}>카카오로 시작하기</Text>
+          </View>
+        </TouchableOpacity>
         
         {/* 구글 로그인 버튼 */}
         <View style={styles.inner}>
