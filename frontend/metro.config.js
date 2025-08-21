@@ -2,14 +2,24 @@
 const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
 
-const config = getDefaultConfig(__dirname);
+module.exports = (async () => {
+  const config = await getDefaultConfig(__dirname);
+  const { assetExts, sourceExts } = config.resolver;
 
-// SVG를 컴포넌트처럼 import 할 수 있게 추가
-config.transformer = {
-  ...config.transformer,
-  babelTransformerPath: require.resolve("react-native-svg-transformer"),
-};
-config.resolver.assetExts = config.resolver.assetExts.filter((ext) => ext !== "svg");
-config.resolver.sourceExts = [...config.resolver.sourceExts, "svg"];
-
-module.exports = withNativeWind(config, { input: "./app/globals.css" });
+  return withNativeWind(
+    {
+      ...config,
+      transformer: {
+        ...config.transformer,
+        // SVG를 리액트 컴포넌트처럼 import
+        babelTransformerPath: require.resolve("react-native-svg-transformer"),
+      },
+      resolver: {
+        ...config.resolver,
+        assetExts: assetExts.filter((ext) => ext !== "svg"),
+        sourceExts: [...sourceExts, "svg"],
+      },
+    },
+    { input: "./app/globals.css" } // NativeWind
+  );
+})();
