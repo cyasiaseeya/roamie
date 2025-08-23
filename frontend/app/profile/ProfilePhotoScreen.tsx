@@ -9,39 +9,66 @@ import {
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { pickFromLibrary, takePhoto, type PhotoAsset } from "./Component/Photopicker"; 
+import { useRouter } from "expo-router";
+import { pickFromLibrary, takePhoto, type PhotoAsset } from "./Component/Photopicker";
+import { scaleW, scaleH, font } from "../../utils/scale";
 
-// ----- scale utils -----
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
-const BASE_W = 360;
-const BASE_H = 800;
-const scaleW = (px: number) => (SCREEN_W / BASE_W) * px;
-const scaleH = (px: number) => (SCREEN_H / BASE_H) * px;
-const font = (px: number) => Math.round((SCREEN_W / BASE_W) * px);
+// 이동할 경로 (실제 파일 경로에 맞게 조정 가능)
+const NEXT_PATH = "/(survey)/survey1";
 
 // ----- Component -----
 const Component = () => {
+  const router = useRouter();
   const [photo, setPhoto] = React.useState<PhotoAsset | null>(null);
+
+  const goNext = React.useCallback(
+    (uri?: string) => {
+      // uri를 다음 화면에 넘기고 싶다면 아래처럼 사용:
+      // router.push({ pathname: NEXT_PATH, params: { photoUri: uri ?? "" } });
+      router.push(NEXT_PATH); // 히스토리 없이 가려면 replace 사용
+    },
+    [router]
+  );
 
   const onUploadPress = React.useCallback(async () => {
     try {
       const res = await pickFromLibrary();
-      if (res?.uri) setPhoto(res);
+      console.log("[pickFromLibrary] result:", res);
+      const uri = (res as any)?.uri || (res as any)?.assets?.[0]?.uri; // 방어적 접근
+      if (uri) {
+        setPhoto({ ...(res as any), uri });
+        goNext(uri);
+      } else {
+        Alert.alert("알림", "유효한 사진을 찾지 못했어요.");
+      }
     } catch (e) {
       console.warn(e);
       Alert.alert("알림", "사진을 불러오는 중 오류가 발생했어요.");
     }
-  }, []);
+  }, [goNext]);
 
   const onTakePress = React.useCallback(async () => {
     try {
       const res = await takePhoto();
-      if (res?.uri) setPhoto(res);
+      console.log("[takePhoto] result:", res);
+      const uri = (res as any)?.uri || (res as any)?.assets?.[0]?.uri; // 방어적 접근
+      if (uri) {
+        setPhoto({ ...(res as any), uri });
+        goNext(uri);
+      } else {
+        Alert.alert("알림", "유효한 사진을 찾지 못했어요.");
+      }
     } catch (e) {
       console.warn(e);
       Alert.alert("알림", "사진을 촬영하는 중 오류가 발생했어요.");
     }
-  }, []);
+  }, [goNext]);
+
+  const onSkipPress = React.useCallback(() => {
+    // 스킵: 사진 없이 바로 이동
+    router.push(NEXT_PATH);
+    // router.replace(NEXT_PATH); // 히스토리 제거 원하면 이걸로
+  }, [router]);
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
@@ -90,7 +117,7 @@ const Component = () => {
 
         {/* 하단 Safe Area(“맨밑의 상자도 safe area”) + 스킵 */}
         <View style={styles.footer}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={onSkipPress}>
             <Text style={styles.skip}>다음에 할게요</Text>
           </TouchableOpacity>
         </View>

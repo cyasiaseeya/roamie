@@ -129,3 +129,12 @@ export async function takePhoto(
 
   return await compressPhoto(raw, compressOpts);
 }
+
+// 유틸리티 함수들을 모아놓은 객체를 default export
+const PhotoPicker = {
+  compressPhoto,
+  pickFromLibrary,
+  takePhoto,
+};
+
+export default PhotoPicker;
