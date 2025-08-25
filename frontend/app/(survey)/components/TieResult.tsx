@@ -8,7 +8,7 @@ import Animated, {
   withSpring,
   runOnJS,
 } from 'react-native-reanimated';
-import { scaleW, scaleH, font } from '../utils/scale';
+import { scaleW, scaleH, font } from '../../../utils/scale';
 import Result1 from './ResultTypeA';
 import Result2 from './ResultTypeB';
 import Result3 from './ResultTypeC';

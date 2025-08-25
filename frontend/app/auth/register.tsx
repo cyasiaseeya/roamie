@@ -77,7 +77,7 @@ const Component = () => {
     <SafeAreaView style={styles.view}>
       {/* 그라데이션 배경 */}
       <LinearGradient
-        colors={['#2567E8', '#0CEC80']}
+        colors={['#007AFF', '#0CEC80']}
         locations={[0.3, 1]}
         style={styles.gradient}
         start={{ x: 0, y: 0 }}
@@ -301,18 +301,17 @@ const styles = StyleSheet.create({
     textAlign: "center"
   },
   input: {
-    marginTop: scaleH(-206),
+    top: scaleH(164),
     marginLeft: scaleW(-164),
     borderRadius: scaleW(16),
     width: scaleW(328),
-    height: scaleH(290),
+    height: scaleH(349),
     backgroundColor: "#FFFFFF",
-    top: "50%",
     left: "50%",
     position: "absolute"
   },
   frameParent: {
-    marginTop: scaleH(-121),
+    marginTop: scaleH(-151),
     marginLeft: scaleW(-140),
     gap: scaleH(10),
     width: scaleW(280),
@@ -442,7 +441,7 @@ const styles = StyleSheet.create({
   },
   button: {
     marginLeft: scaleW(-150),
-    top: scaleH(529),
+    top: scaleH(559),
     shadowColor: "rgba(37, 62, 167, 0.48)",
     backgroundColor: "#1D61E7",
     borderColor: "rgba(255, 255, 255, 0.12)",

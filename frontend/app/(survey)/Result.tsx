@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Result1 from '../../component/ResultTypeA';
-import Result2 from '../../component/ResultTypeB';
-import Result3 from '../../component/ResultTypeC';
-import Result4 from '../../component/ResultTypeD';
-import TieResult from '../../component/TieResult';
+import Result1 from './components/ResultTypeA';
+import Result2 from './components/ResultTypeB';
+import Result3 from './components/ResultTypeC';
+import Result4 from './components/ResultTypeD';
+import TieResult from './components/TieResult';
 
 const SurveyResultPage = () => {
   const [resultComponent, setResultComponent] = useState<React.ReactElement | null>(null);

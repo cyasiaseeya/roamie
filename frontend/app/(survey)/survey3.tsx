@@ -2,8 +2,8 @@ import * as React from "react";
 import { Text, View, Image } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SurveyStyles } from "../../component/SurveyStyles";
-import SurveyOption from "../../component/SurveyOptions";
+import { SurveyStyles } from "./components/SurveyStyles";
+import SurveyOption from "./components/SurveyOptions";
 
 const Survey3 = () => {
   const [selectedOption, setSelectedOption] = React.useState<string>("");

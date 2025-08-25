@@ -2,8 +2,8 @@ import * as React from "react";
 import { Text, View } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SurveyStyles } from "../../component/SurveyStyles";
-import SurveyOption from "../../component/SurveyOptions";
+import { SurveyStyles } from "./components/SurveyStyles";
+import SurveyOption from "./components/SurveyOptions";
 import EssentialAirportSvg from "../../assets/images/Survey9.svg";
 
 const Survey9 = () => {

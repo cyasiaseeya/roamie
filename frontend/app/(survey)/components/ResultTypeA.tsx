@@ -2,9 +2,9 @@ import React from "react";
 import { StyleSheet, View, Image, TouchableOpacity, Text, ViewStyle, TextStyle, ImageStyle, ScrollView } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { scaleW, scaleH, font } from "../utils/scale";
+import { scaleW, scaleH, font } from "../../../utils/scale";
 
-const ResultTypeD = () => {
+const ResultTypeA = () => {
   const resetSurvey = async () => {
     try {
       await AsyncStorage.removeItem('surveyAnswers');
@@ -25,7 +25,7 @@ const ResultTypeD = () => {
         {/* 이미지 영역 */}
         <View style={styles.imageSection}>
           <Image 
-            source={require("../assets/images/SurveyResult4.png")}
+            source={require("../../../assets/images/SurveyResult1.png")}
             style={styles.earthImage}
             resizeMode="contain"
           />
@@ -33,13 +33,13 @@ const ResultTypeD = () => {
         
         {/* 제목 영역 */}
         <View style={styles.titleSection}>
-          <Text style={styles.titleText}>계획형</Text>
+          <Text style={styles.titleText}>모험형</Text>
         </View>
         
         {/* 설명 텍스트 영역 */}
         <View style={styles.descriptionSection}>
           <Text style={styles.descriptionText}>
-          일정과 준비를 중시하는 체계적인 유형입니다. 여행의 모든 순간을 미리 계획하고, 시간과 동선, 상황에 따라 꼼꼼하게 움직입니다. 예상치 못한 상황에도 절차대로 차분히 대응합니다.
+            새로운 경험을 추구하고, 즉흥적인 선택과 탐험을 즐기는 유형입니다. 낯선 장소나 활동에도 두려움 없이 뛰어들며, 계획에 얽매이지 않고 다양한 상황을 스스로 개척합니다.
           </Text>
         </View>
         
@@ -87,7 +87,7 @@ const styles = StyleSheet.create<Styles>({
   contentContainer: {
     flexGrow: 1,
     paddingHorizontal: scaleW(20),
-    paddingBottom: scaleH(20),
+    paddingBottom: scaleH(20), // 하단 여백 추가
   },
   imageSection: {
     height: scaleH(270), // Figma에서는 270px 높이
@@ -100,7 +100,7 @@ const styles = StyleSheet.create<Styles>({
     height: scaleH(270),
   },
   titleSection: {
-    height: scaleH(70),
+    height: scaleH(70), 
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: scaleH(20),
@@ -111,7 +111,7 @@ const styles = StyleSheet.create<Styles>({
     color: '#000000',
     textAlign: 'center',
     fontFamily: 'Pretendard',
-    lineHeight: font(40), // 26 → 40으로 증가
+    lineHeight: font(40), // 26 → 40으로 증가 (더 넉넉한 줄간격)
     includeFontPadding: false, // 폰트 패딩 제거
   },
   descriptionSection: {
@@ -154,4 +154,4 @@ const styles = StyleSheet.create<Styles>({
   },
 });
 
-export default ResultTypeD;
+export default ResultTypeA;

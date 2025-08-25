@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, View, Image, TouchableOpacity, Text, ViewStyle, TextStyle, ImageStyle, ScrollView } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { scaleW, scaleH, font } from "../utils/scale";
+import { scaleW, scaleH, font } from "../../../utils/scale";
 
 const ResultTypeB = () => {
   const resetSurvey = async () => {
@@ -25,7 +25,7 @@ const ResultTypeB = () => {
         {/* 이미지 영역 */}
         <View style={styles.imageSection}>
           <Image 
-            source={require("../assets/images/SurveyResult2.png")}
+            source={require("../../../assets/images/SurveyResult2.png")}
             style={styles.earthImage}
             resizeMode="contain"
           />

@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
-import { scaleW, scaleH, font } from "../utils/scale";
+import { scaleW, scaleH, font } from "../../../utils/scale";
 
-export const SurveyStyles = StyleSheet.create({
+export const SurveyStyles = StyleSheet.create({   
   root: {
     flex: 1,
     backgroundColor: "#fff",
