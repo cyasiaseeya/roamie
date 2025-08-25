@@ -1,5 +1,5 @@
 // Component.tsx
-import React, {useMemo, useState} from "react";
+import React, { useMemo, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -12,22 +12,23 @@ import {
   Platform,
   TextInput,
 } from "react-native";
-import {LinearGradient} from 'expo-linear-gradient';
-import {router} from "expo-router";
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from "expo-router";
 import Calendar from "../../assets/images/calendar.svg";
-import Vector from "../../assets/images/Vector.svg";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import {scaleW, scaleH, font} from "../../utils/scale";
+import { scaleW, scaleH, font } from "../../utils/scale";
+import { api, setToken } from "../../lib/api";
+import { Alert } from "react-native";
 
-// ─────────────────────────────────────────────
-// Gender options
-// ─────────────────────────────────────────────
-const GENDER_OPTIONS = ["남성", "여성", "기타"] as const;
-type Gender = (typeof GENDER_OPTIONS)[number];
+type Gender = "남성" | "여성" | "기타";
+const GENDER_OPTIONS: Gender[] = ["남성", "여성", "기타"];
+const codeFromGender = (g: Gender | null) => g === "남성" ? "M" : g === "여성" ? "F" : "O";
+const fmtDate = (d: Date | null) =>
+  d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "";
 
 const Component = () => {
-  // form state
-  const [nickname, setNickname] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [gender, setGender] = useState<Gender | null>(null);
   const [birthDate, setBirthDate] = useState<Date | null>(null);
 
@@ -44,18 +45,32 @@ const Component = () => {
     () =>
       birthDate
         ? `${birthDate.getFullYear()}-${String(birthDate.getMonth() + 1).padStart(2, "0")}-${String(
-            birthDate.getDate()
-          ).padStart(2, "0")}`
+          birthDate.getDate()
+        ).padStart(2, "0")}`
         : "생년월일을 선택해 주세요",
     [birthDate]
   );
 
   // 폼 제출
-  const onSubmit = () => {
-    // TODO: 실제 회원가입 핸들러 연결
-    console.log({nickname, gender, birthDate});
-    // 프로필 사진 선택 페이지로 이동
-    router.push("/profile/ProfilePhotoScreen");
+  const onSubmit = async () => {
+    try {
+      const body = {
+        username,
+        password,
+        birthdate: fmtDate(birthDate),
+        gender_code: codeFromGender(gender),
+        // nickname is NOT sent (we’ll add validation/rules later if you want it)
+      };
+      const res = await api("/auth/register", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+      // auto-login with returned JWT
+      setToken(res.token);
+      router.replace("/profile/ProfilePhotoScreen");
+    } catch (e: any) {
+      Alert.alert("회원가입 실패", e?.message ?? String(e));
+    }
   };
 
   return (
@@ -68,17 +83,17 @@ const Component = () => {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       />
-      
+
       <View style={styles.view1}>
         {/* 뒤로가기 버튼 */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.keyboardBackspaceIcon}
           onPress={() => router.back()}
         >
           <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
 
-        
+
 
         {/* 회원가입 타이틀 */}
         <View style={styles.wrapper}>
@@ -94,16 +109,30 @@ const Component = () => {
                 <View style={styles.title}>
                   <Text style={styles.email}>별명</Text>
                 </View>
-                                 <TextInput
-                   style={styles.inputArea}
-                   placeholder="별명을 적어주세요"
-                   placeholderTextColor="#8B8383"
-                   value={nickname}
-                   onChangeText={setNickname}
-                 />
+                <TextInput
+                  style={styles.inputArea}
+                  placeholder="별명을 적어주세요"
+                  placeholderTextColor="#8B8383"
+                  value={username}
+                  onChangeText={setUsername}
+                />
               </View>
             </View>
-
+            {/* 비밀번호 입력 */}
+            <View style={styles.inputFieldWrapper}>
+              <View style={styles.inputField}>
+                <View style={styles.title}>
+                  <Text style={styles.email}>비밀번호</Text>
+                </View>
+                <TextInput
+                  style={styles.inputArea}
+                  placeholder="비밀번호를 적어주세요"
+                  placeholderTextColor="#8B8383"
+                  value={password}
+                  onChangeText={setPassword}
+                />
+              </View>
+            </View>
             {/* 성별 선택 */}
             <View style={styles.view2}>
               <View style={styles.title1}>
@@ -147,7 +176,7 @@ const Component = () => {
         </View>
 
         {/* 회원가입 버튼 */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.button}
           onPress={onSubmit}
           activeOpacity={0.9}
@@ -166,7 +195,7 @@ const Component = () => {
           <FlatList
             data={GENDER_OPTIONS as readonly string[]}
             keyExtractor={(item) => item}
-            renderItem={({item}) => (
+            renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.dropdownItem}
                 onPress={() => {
@@ -211,9 +240,9 @@ const Component = () => {
                   if (selected) setBirthDate(selected);
                 }}
                 maximumDate={new Date()}
-                style={{alignSelf: "center"}}
+                style={{ alignSelf: "center" }}
               />
-              <TouchableOpacity style={[styles.cta, {marginTop: scaleH(16)}]} onPress={() => setDateOpen(false)}>
+              <TouchableOpacity style={[styles.cta, { marginTop: scaleH(16) }]} onPress={() => setDateOpen(false)}>
                 <Text style={styles.ctaText}>확인</Text>
               </TouchableOpacity>
             </View>
@@ -492,7 +521,7 @@ const styles = StyleSheet.create({
     borderRadius: scaleW(16),
     padding: scaleW(16),
     shadowColor: "rgba(0,0,0,0.25)",
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.9,
     shadowRadius: 6,
     elevation: 4,
@@ -506,7 +535,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.12)",
     shadowColor: "rgba(37,62,167,0.48)",
-    shadowOffset: {width: 0, height: 1},
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 1,
     shadowRadius: 2,
     elevation: 2,

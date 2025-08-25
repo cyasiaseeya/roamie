@@ -1,102 +1,32 @@
-from typing import Optional, Literal
-from fastapi import APIRouter, Depends, Header, HTTPException
-from pydantic import BaseModel, Field, ConfigDict
-from app.deps.auth import current_user
-from app.config import settings
-import httpx
+from fastapi import APIRouter, UploadFile, File, HTTPException
+from ..deps.deps_auth import require_user
+from ..services.supabase_admin import get_sb
 
-router = APIRouter()
+router = APIRouter(prefix="/profile", tags=["profile"])
 
-# Schemas (just for Swagger / OpenAPI)
-class ProfileInitRequest(BaseModel):
-    username: str = Field(..., description="사용자 닉네임(고유)")
-    dob: str = Field(..., description="생년월일, 형식: YYYY-MM-DD")
-    gender_code: Literal['M', 'F', 'O'] = Field(
-        ..., description="성별 코드: M=남성, F=여성, O=기타"
-    )
-
-class AvatarUpdateRequest(BaseModel):
-    use_default: Optional[bool] = Field(
-        None, description="기본 아바타(default.jpg) 사용 시 true"
-    )
-    public_url: Optional[str] = Field(
-        None,
-        description="Storage에 업로드한 이미지의 Public URL (avatars/<uid>/...jpg)",
-    )
-
-# Create profile (first-time after social sign-in)
-@router.post("/init", status_code=201)
-async def init_profile(
-    body: ProfileInitRequest,
-    user = Depends(current_user),
-    authorization: str = Header(...)  # user's Supabase JWT from the app
-):
-    required = {"username", "dob", "gender_code"}
-    if not required.issubset(body.keys()):
-        raise HTTPException(status_code=400, detail="Missing fields")
-
-    data = {
-        "id": user["sub"],                 # auth.users.id
-        "username": body["username"],
-        "dob": body["dob"],                # "YYYY-MM-DD"
-        "gender_code": body["gender_code"] # 'M' | 'F' | 'O'
-        # avatar_url uses DB default (.jpg)
-    }
-
-    url = f"{settings.SUPABASE_URL}/rest/v1/profiles"
-    headers = {
-        "apikey": settings.SUPABASE_ANON_KEY,
-        "Authorization": authorization,    # forward user's JWT for RLS
-        "Prefer": "return=representation"
-    }
-    async with httpx.AsyncClient(timeout=10) as client:
-        r = await client.post(url, json=data, headers=headers)
-    if r.status_code != 201:
-        raise HTTPException(status_code=r.status_code, detail=r.text)
-    return r.json()[0]
-
-# Get my profile (404 if none -> use to decide onboarding vs home)
 @router.get("/me")
-async def me(
-    user = Depends(current_user),
-    authorization: str = Header(...)
-):
-    url = f"{settings.SUPABASE_URL}/rest/v1/profiles?id=eq.{user['sub']}&select=*"
-    headers = {
-        "apikey": settings.SUPABASE_ANON_KEY,
-        "Authorization": authorization
-    }
-    async with httpx.AsyncClient(timeout=10) as client:
-        r = await client.get(url, headers=headers)
-    if r.status_code != 200:
-        raise HTTPException(status_code=r.status_code, detail=r.text)
-    rows = r.json()
-    if not rows:
-        raise HTTPException(status_code=404, detail="Profile not found")
-    return rows[0]
+def me(user_id: str = require_user):
+    sb = get_sb()
+    u = sb.table("users").select("id,username").eq("id", user_id).single().execute().data
+    p = sb.table("profiles").select("birthdate,gender_code,avatar_url,profile_description").eq("user_id", user_id).single().execute().data
+    return {"user": u, "profile": p}
 
-# Set avatar URL (either default or a public URL from Storage)
-@router.patch("/avatar")
-async def update_avatar(
-    body: dict,
-    user = Depends(current_user),
-    authorization: str = Header(...)
-):
-    if body.get("use_default"):
-        avatar_url = f"{settings.SUPABASE_URL}/storage/v1/object/public/avatars/default.jpg"
-    else:
-        avatar_url = body.get("public_url")
-        if not avatar_url:
-            raise HTTPException(status_code=400, detail="Provide public_url or use_default=true")
+@router.post("/avatar")
+async def upload_avatar(file: UploadFile = File(...), user_id: str = require_user):
+    sb = get_sb()
+    path = f"{user_id}/avatar.jpg"
+    data = await file.read()
+    r = sb.storage.from_("avatars").upload(path, data, {
+        "contentType": file.content_type or "image/jpeg",
+        "upsert": True
+    })
+    if getattr(r, "error", None):
+        raise HTTPException(500, str(r.error))
 
-    url = f"{settings.SUPABASE_URL}/rest/v1/profiles?id=eq.{user['sub']}"
-    headers = {
-        "apikey": settings.SUPABASE_ANON_KEY,
-        "Authorization": authorization,
-        "Prefer": "return=representation"
-    }
-    async with httpx.AsyncClient(timeout=10) as client:
-        r = await client.patch(url, json={"avatar_url": avatar_url}, headers=headers)
-    if r.status_code not in (200, 204):
-        raise HTTPException(status_code=r.status_code, detail=r.text)
-    return r.json()[0] if r.text else {"ok": True}
+    public = sb.storage.from_("avatars").get_public_url(path)
+    url = public.get("data", {}).get("publicUrl") if isinstance(public, dict) else public.data.get("publicUrl")
+    if not url:
+        raise HTTPException(500, "Failed to get public URL")
+
+    sb.table("profiles").update({"avatar_url": url}).eq("user_id", user_id).execute()
+    return {"avatar_url": url}

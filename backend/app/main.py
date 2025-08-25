@@ -1,9 +1,12 @@
 from fastapi import FastAPI
-from app.routers import profile
+from .core.security import add_cors
+from .routers import auth, profile
 
-app = FastAPI(title="Roamie", version="0.1.0")
-app.include_router(profile.router, prefix="/v1/profile", tags=["profile"])
+def create_app():
+    app = FastAPI(title="Romie Backend")
+    add_cors(app)
+    app.include_router(auth.router)
+    app.include_router(profile.router)
+    return app
 
-@app.get("/healthz")
-async def health():
-    return {"ok": True}
+app = create_app()
