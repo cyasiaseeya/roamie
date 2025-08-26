@@ -67,7 +67,10 @@ const LoginScreen = () => {
         </View>
 
         {/* 로그인 버튼 */}
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity 
+          style={styles.button}
+          //onPress={() => router.push("/main")}
+        >
           <Text style={styles.buttonText}>로그인</Text>
         </TouchableOpacity>
       </View>
@@ -192,7 +195,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: font(14),
-    color: "#000",
+    color: "#fff",
     textAlign: "center",
     marginTop: scaleH(46),
   },
