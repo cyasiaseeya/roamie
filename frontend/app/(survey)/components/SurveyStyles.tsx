@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import { scaleW, scaleH, font } from "../../../utils/scale";
 
-export const SurveyStyles = StyleSheet.create({   
+const SurveyStyles = StyleSheet.create({   
   root: {
     flex: 1,
     backgroundColor: "#fff",
@@ -45,14 +45,8 @@ export const SurveyStyles = StyleSheet.create({
     width: scaleW(326),
     borderRadius: scaleW(16),
     backgroundColor: "#007aff",
-    shadowColor: "rgba(0, 0, 0, 0.25)",
-    shadowOffset: {
-      width: 0,
-      height: 0
-    },
-    shadowRadius: 4,
+    boxShadow: "0px 0px 4px rgba(0, 0, 0, 0.25)",
     elevation: 4,
-    shadowOpacity: 1,
     justifyContent: "center",
     alignItems: "center",
     position: "absolute",
@@ -136,3 +130,6 @@ export const SurveyStyles = StyleSheet.create({
     backgroundColor: "#007aff",
   },
 });
+
+export { SurveyStyles };
+export default SurveyStyles;
