@@ -37,7 +37,7 @@ def register(body: RegisterIn):
     # create profile with default avatar
     sb.table("profiles").insert({
         "user_id": uid,
-        "birthdate": body.birthdate,
+        "birthdate": body.birthdate.isoformat(),
         "gender_code": body.gender_code,
         "avatar_url": settings.DEFAULT_AVATAR_URL,
         "profile_description": None
