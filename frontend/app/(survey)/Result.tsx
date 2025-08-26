@@ -80,6 +80,7 @@ const SurveyResultPage = () => {
   };
 
   const getResultComponent = (result: 'A' | 'B' | 'C' | 'D') => {
+    console.log('getResultComponent 호출됨, result:', result);
     const components = {
       A: <Result1 />,
       B: <Result2 />,
@@ -87,7 +88,9 @@ const SurveyResultPage = () => {
       D: <Result4 />
     };
     
-    return components[result];
+    const component = components[result];
+    console.log('반환할 컴포넌트:', component);
+    return component;
   };
 
   const handleTieSelection = (selectedResult: 'A' | 'B' | 'C' | 'D') => {
@@ -108,9 +111,13 @@ const SurveyResultPage = () => {
     );
   }
 
+  console.log('Result.tsx 렌더링, resultComponent:', resultComponent);
+  console.log('showTieSelector:', showTieSelector);
+  console.log('loading:', loading);
+  
   return (
-    <View>
-      {resultComponent}
+    <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+      {resultComponent || <Text>컴포넌트가 없습니다</Text>}
     </View>
   );
 };
