@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
+from typing import Literal
+from datetime import date
 from passlib.hash import bcrypt
 from ..services.supabase_admin import get_sb
 from ..deps.deps_auth import mint_token
@@ -8,10 +10,10 @@ from ..core.config import settings
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 class RegisterIn(BaseModel):
-    username: str
-    password: str
-    birthdate: str     # no validation yet
-    gender_code: str   # expect 'M' | 'F' | 'O' later
+    username: str = Field(min_length=5, max_length=14)
+    password: str = Field(min_length=8, max_length=21)
+    birthdate: date     # no validation yet
+    gender_code: Literal["M", "F", "O"]   # expect 'M' | 'F' | 'O' later
 
 class LoginIn(BaseModel):
     username: str
