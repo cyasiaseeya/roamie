@@ -6,6 +6,7 @@ import Result2 from './components/ResultTypeB';
 import Result3 from './components/ResultTypeC';
 import Result4 from './components/ResultTypeD';
 import TieResult from './components/TieResult';
+import { api } from '@/lib/api';
 
 const SurveyResultPage = () => {
   const [resultComponent, setResultComponent] = useState<React.ReactElement | null>(null);
@@ -111,6 +112,32 @@ const SurveyResultPage = () => {
     );
   }
 
+  const resultNames = {
+    A: '모험형',
+    B: '문화형',
+    C: '휴식형',
+    D: '계획형',
+  };
+
+
+  const saveResult = async (result: 'A' | 'B' | 'C' | 'D') => {
+    try {
+      const resultData = {
+        travel_type: result,
+        travel_type_name: resultNames[result]
+      };
+      
+      const response = await api('/api/survey/result', {
+        method: 'POST',
+        body: JSON.stringify(resultData)
+      });
+      
+      console.log('저장 성공:', response);
+    } catch (error) {
+      console.error('결과 저장 실패:', error);
+    }
+  }
+  
   console.log('Result.tsx 렌더링, resultComponent:', resultComponent);
   console.log('showTieSelector:', showTieSelector);
   console.log('loading:', loading);

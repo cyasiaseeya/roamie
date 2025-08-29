@@ -34,9 +34,9 @@ const TieResult: React.FC<TieResultProps> = ({ tiedResults, onSelect }) => {
 
   const resultNames = {
     A: '모험형',
-    B: '계획형',
-    C: '여유형',
-    D: '소통형',
+    B: '문화형',
+    C: '휴식형',
+    D: '계획형',
   };
 
   const gestureHandler = useAnimatedGestureHandler({
