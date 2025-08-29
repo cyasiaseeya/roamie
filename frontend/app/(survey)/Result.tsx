@@ -18,6 +18,55 @@ const SurveyResultPage = () => {
     calculateAndShowResult();
   }, []);
 
+  const resultNames = {
+    A: '모험형',
+    B: '문화형',
+    C: '휴식형',
+    D: '계획형',
+  };
+
+  const saveResult = async (result: 'A' | 'B' | 'C' | 'D') => {
+    try {
+      const resultData = {
+        travel_type: result,
+        travel_type_name: resultNames[result]
+      };
+      
+      console.log('=== 최종 결과 저장 시작 ===');
+      console.log('저장할 결과:', resultData);
+      console.log('결과 코드:', result);
+      console.log('결과 이름:', resultNames[result]);
+      console.log('API 호출 URL: /api/survey/result');
+      console.log('요청 데이터:', JSON.stringify(resultData));
+      
+      // 임시로 로컬 저장 (백엔드 엔드포인트가 없어서)
+      console.log('백엔드에 /api/survey/result 엔드포인트가 없습니다.');
+      console.log('임시로 로컬에 저장합니다.');
+      
+      // AsyncStorage에 결과 저장 (이미 import 되어 있음)
+      await AsyncStorage.setItem('surveyResult', JSON.stringify(resultData));
+      
+      // 가짜 응답 생성
+      const response = { success: true, message: '임시 저장 완료' };
+      
+      console.log('=== 저장 성공! ===');
+      console.log('서버 응답:', response);
+      console.log('저장된 최종 결과: [' + result + '] ' + resultNames[result]);
+      console.log('===================');
+    } catch (error: any) {
+      console.error('=== 결과 저장 실패! ===');
+      console.error('오류 메시지:', error?.message || error);
+      console.error('오류 전체:', error);
+      console.error('저장하려던 결과:', result, resultNames[result]);
+      console.error('API URL: /api/survey/result');
+      console.error('환경변수 BASE URL:', process.env.EXPO_PUBLIC_API_URL);
+      console.error('==================');
+    }
+  }
+  
+
+
+
   const calculateAndShowResult = async () => {
     try {
       // AsyncStorage에서 답변들 가져오기
@@ -36,7 +85,9 @@ const SurveyResultPage = () => {
           setShowTieSelector(true);
         } else {
           // 단일 결과인 경우
-          setResultComponent(getResultComponent(result as 'A' | 'B' | 'C' | 'D'));
+          const finalResult = result as 'A' | 'B' | 'C' | 'D';
+          await saveResult(finalResult);
+          setResultComponent(getResultComponent(finalResult));
         }
       } else {
         console.log('저장된 답변이 없습니다');
@@ -94,8 +145,9 @@ const SurveyResultPage = () => {
     return component;
   };
 
-  const handleTieSelection = (selectedResult: 'A' | 'B' | 'C' | 'D') => {
+  const handleTieSelection = async (selectedResult: 'A' | 'B' | 'C' | 'D') => {
     setShowTieSelector(false);
+    await saveResult(selectedResult);
     setResultComponent(getResultComponent(selectedResult));
   };
 
@@ -112,32 +164,7 @@ const SurveyResultPage = () => {
     );
   }
 
-  const resultNames = {
-    A: '모험형',
-    B: '문화형',
-    C: '휴식형',
-    D: '계획형',
-  };
 
-
-  const saveResult = async (result: 'A' | 'B' | 'C' | 'D') => {
-    try {
-      const resultData = {
-        travel_type: result,
-        travel_type_name: resultNames[result]
-      };
-      
-      const response = await api('/api/survey/result', {
-        method: 'POST',
-        body: JSON.stringify(resultData)
-      });
-      
-      console.log('저장 성공:', response);
-    } catch (error) {
-      console.error('결과 저장 실패:', error);
-    }
-  }
-  
   console.log('Result.tsx 렌더링, resultComponent:', resultComponent);
   console.log('showTieSelector:', showTieSelector);
   console.log('loading:', loading);
