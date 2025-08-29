@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      TZ: Asia/Seoul
+    volumes:
+      - ./backend:/app
+    # Android 에뮬레이터에서 호스트 접근 특수 주소 쓰려면 이건 없어도 됨.
+    # Linux에서 host.docker.internal 쓰려면 아래 라인 필요
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
