@@ -241,6 +241,7 @@ const Component = () => {
                         index === GENDER_OPTIONS.length - 1 && styles.lastDropdownItem
                       ]}
                       onPress={() => {
+                        console.log('Gender option pressed:', option);
                         setGender(option);
                         setGenderOpen(false);
                       }}
@@ -285,14 +286,7 @@ const Component = () => {
         </TouchableOpacity>
       </View>
 
-      {/* 드롭다운이 열려있을 때 배경 터치로 닫기 */}
-      {genderOpen && (
-        <TouchableOpacity
-          style={styles.dropdownOverlay}
-          onPress={() => setGenderOpen(false)}
-          activeOpacity={1}
-        />
-      )}
+
 
       {/* 날짜 선택 (iOS는 인라인/스피너, Android는 팝업) */}
       {dateOpen && (
@@ -331,6 +325,8 @@ const Component = () => {
           </Modal>
         )
       )}
+
+
     </SafeAreaView>
   );
 };
@@ -539,8 +535,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 4,
-    elevation: 4,
-    zIndex: 1000,
+    elevation: 10,
+    zIndex: 9999,
   },
   inlineDropdownItem: {
     paddingVertical: scaleH(12),
@@ -562,7 +558,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 999,
+    zIndex: 500,
   },
   groupIcon: {
     position: "absolute",
@@ -651,6 +647,7 @@ const styles = StyleSheet.create({
     fontFamily: "Pretendard",
     fontWeight: "600",
   },
+
 });
 
 export default Component;
