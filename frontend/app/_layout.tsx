@@ -1,9 +1,12 @@
 import React from 'react';
-import { Stack } from 'expo-router';
+import {Drawer} from 'expo-router/drawer';
+import { Stack} from 'expo-router';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { scaleW } from '../utils/scale';
+import CustomDrawer from "../component/Drawer";
+import './globals.css';
 
 function Shell({ children }: { children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
@@ -25,19 +28,30 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
+
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <Shell>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: 'transparent' },
-            }}
-          />
+      <Drawer
+        screenOptions={{ headerShown: false }}
+        drawerContent={(props) => <CustomDrawer {...props} />}>
+            {/* 여행 관련 그룹 */}
+            <Drawer.Screen name="(travel)" options={{ title: "여행" }} />
+
+            {/* 프로필 관련 그룹 */}
+            <Drawer.Screen name="profile" options={{ title: "프로필" }} />
+
+            {/* 기본 Stack (Drawer 밖에서도 쓰고 싶은 화면이 있다면 여기에) */}
+            <Drawer.Screen
+              name="index"
+              options={{ title: "홈" }}
+            />
+          </Drawer>
         </Shell>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
+

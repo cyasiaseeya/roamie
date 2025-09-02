@@ -33,7 +33,7 @@ const SurveyResultPage = () => {
       };
       
       console.log('=== 최종 결과 저장 시작 ===');
-      console.log('저장할 결과:', resultData);
+      console.log('저장할 결과:', resultData);  
       console.log('결과 코드:', result);
       console.log('결과 이름:', resultNames[result]);
       console.log('API 호출 URL: /api/survey/result');
