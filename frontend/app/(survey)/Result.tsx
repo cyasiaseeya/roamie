@@ -6,7 +6,7 @@ import Result2 from './components/ResultTypeB';
 import Result3 from './components/ResultTypeC';
 import Result4 from './components/ResultTypeD';
 import TieResult from './components/TieResult';
-import { api } from '@/lib/api';
+import { api, setToken } from '@/lib/api';
 
 const SurveyResultPage = () => {
   const [resultComponent, setResultComponent] = useState<React.ReactElement | null>(null);
@@ -23,6 +23,13 @@ const SurveyResultPage = () => {
     B: '문화형',
     C: '휴식형',
     D: '계획형',
+  };
+
+  const resultDescriptions = {
+    A: '새로운 경험을 추구하고, 즉흥적인 선택과 탐험을 즐기는 유형입니다. 낯선 장소나 활동에도 두려움 없이 뛰어들며, 계획에 얽매이지 않고 다양한 상황을 스스로 개척합니다.',
+    B: '여행지의 역사, 예술, 현지인과의 교류 등 문화적 요소에 관심이 많은 유형입니다. 정보를 확인하거나 체험하며, 그에 담긴 의미나 배경을 알아가는 것을 즐깁니다.',
+    C: '여행 중에도 편안함과 여유를 우선시하는 유형입니다. 카페, 공원, 숙소 등에서 휴식을 취하거나, 심신의 안정을 도모하는 활동을 선호합니다. 때로 활동보다는 느긋하게 쉬는 것을 더 중요하게 생각합니다.',
+    D: '일정과 준비를 중시하는 체계적인 유형입니다. 여행의 모든 순간을 미리 계획하고, 시간과 동선, 상황에 따라 꼼꼼하게 움직입니다. 예상치 못한 상황에도 절차대로 차분히 대응합니다.',
   };
 
   const saveResult = async (result: 'A' | 'B' | 'C' | 'D') => {
@@ -58,26 +65,32 @@ const SurveyResultPage = () => {
       console.error('오류 메시지:', error?.message || error);
       console.error('오류 전체:', error);
       console.error('저장하려던 결과:', result, resultNames[result]);
-      console.error('API URL: /api/survey/result');
-      console.error('환경변수 BASE URL:', process.env.EXPO_PUBLIC_API_URL);
+      console.error('API URL: /profile/survey-result');
       console.error('==================');
+      
+      // 에러 발생 시 로컬에만 저장 (fallback)
+      try {
+        await AsyncStorage.setItem('surveyResult', JSON.stringify({
+          travel_type: result,
+          travel_type_name: resultNames[result],
+          description: resultDescriptions[result]
+        }));
+        console.log('로컬 저장 완료 (fallback)');
+      } catch (localError) {
+        console.error('로컬 저장도 실패:', localError);
+      }
     }
   }
-  
-
-
 
   const calculateAndShowResult = async () => {
     try {
       // AsyncStorage에서 답변들 가져오기
       const savedAnswers = await AsyncStorage.getItem('surveyAnswers');
-      console.log('저장된 답변들:', savedAnswers);
+
       
       if (savedAnswers) {
         const answers = JSON.parse(savedAnswers);
-        console.log('파싱된 답변들:', answers);
         const { result, tied } = calculateResult(answers);
-        console.log('계산된 결과:', result, '동률 결과들:', tied);
         
         if (result === 'TIE' && tied) {
           // 동률인 경우
@@ -90,12 +103,11 @@ const SurveyResultPage = () => {
           setResultComponent(getResultComponent(finalResult));
         }
       } else {
-        console.log('저장된 답변이 없습니다');
         // 기본값
         setResultComponent(getResultComponent('A'));
       }
     } catch (error) {
-      console.error('답변 불러오기 실패:', error);
+      // Handle error silently
     } finally {
       setLoading(false);
     }
@@ -119,10 +131,6 @@ const SurveyResultPage = () => {
       key => counts[key] === maxCount && maxCount > 0
     );
     
-    console.log('점수:', counts);
-    console.log('최고 점수:', maxCount);
-    console.log('동률 결과들:', tiedResults);
-    
     // 동률이면 'TIE' 반환
     if (tiedResults.length > 1) {
       return { result: 'TIE', tied: tiedResults };
@@ -132,7 +140,6 @@ const SurveyResultPage = () => {
   };
 
   const getResultComponent = (result: 'A' | 'B' | 'C' | 'D') => {
-    console.log('getResultComponent 호출됨, result:', result);
     const components = {
       A: <Result1 />,
       B: <Result2 />,
@@ -140,9 +147,7 @@ const SurveyResultPage = () => {
       D: <Result4 />
     };
     
-    const component = components[result];
-    console.log('반환할 컴포넌트:', component);
-    return component;
+    return components[result];
   };
 
   const handleTieSelection = async (selectedResult: 'A' | 'B' | 'C' | 'D') => {
@@ -163,11 +168,6 @@ const SurveyResultPage = () => {
       />
     );
   }
-
-
-  console.log('Result.tsx 렌더링, resultComponent:', resultComponent);
-  console.log('showTieSelector:', showTieSelector);
-  console.log('loading:', loading);
   
   return (
     <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
