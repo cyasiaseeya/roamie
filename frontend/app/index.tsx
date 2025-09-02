@@ -7,6 +7,5 @@ import React from "react";
 import FirstSurvey from "./(survey)/survey1";
 
 export default function App() {
-  return <FirstSurvey />; 
-  //return <FirstScreen />;
+  return <FirstScreen />;
 }

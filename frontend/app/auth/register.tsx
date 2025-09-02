@@ -20,6 +20,7 @@ import VisibilityOn from "../../assets/images/visibility.svg";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { scaleW, scaleH, font } from "../../utils/scale";
 import { api, setToken } from "../../lib/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
 
 type Gender = "남성" | "여성" | "기타";
@@ -123,6 +124,10 @@ const Component = () => {
       });
       // auto-login with returned JWT
       setToken(res.token);
+      
+      // Save JWT token to AsyncStorage for persistence
+      await AsyncStorage.setItem('jwt_token', res.token);
+      
       router.replace("/profile/ProfilePhotoScreen");
     } catch (e: any) {
       Alert.alert("회원가입 실패", e?.message ?? String(e));
