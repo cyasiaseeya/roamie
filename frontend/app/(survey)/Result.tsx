@@ -35,31 +35,42 @@ const SurveyResultPage = () => {
   const saveResult = async (result: 'A' | 'B' | 'C' | 'D') => {
     try {
       const resultData = {
-        travel_type: result,
-        travel_type_name: resultNames[result]
-      };
+        travel_type_name: resultNames[result],
+        description: resultDescriptions[result]
+      };      
+      // JWT 토큰 가져오기 (AsyncStorage에서)
+      const token = await AsyncStorage.getItem('jwt_token');
       
-      console.log('=== 최종 결과 저장 시작 ===');
-      console.log('저장할 결과:', resultData);  
-      console.log('결과 코드:', result);
-      console.log('결과 이름:', resultNames[result]);
-      console.log('API 호출 URL: /api/survey/result');
-      console.log('요청 데이터:', JSON.stringify(resultData));
+      if (token) {
+        // 토큰이 있으면 백엔드 API 호출
+        try {
+          // API 모듈에 토큰 설정
+          setToken(token);
+          
+          // 백엔드 API 호출
+          const response = await api('/profile/survey-result', {
+            method: 'POST',
+            body: JSON.stringify(resultData),
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+
+        } catch (apiError: any) {
+          // Backend save failed, continue with local storage
+        }
+      } else {
+        // No JWT token, continue with local storage only
+      }
+      // 항상 로컬에 저장 (백업용)
+      await AsyncStorage.setItem('surveyResult', JSON.stringify({
+        ...resultData,
+        travel_type: result
+      }));
       
-      // 임시로 로컬 저장 (백엔드 엔드포인트가 없어서)
-      console.log('백엔드에 /api/survey/result 엔드포인트가 없습니다.');
-      console.log('임시로 로컬에 저장합니다.');
+      console.log('로컬 저장 완료');
       
-      // AsyncStorage에 결과 저장 (이미 import 되어 있음)
-      await AsyncStorage.setItem('surveyResult', JSON.stringify(resultData));
-      
-      // 가짜 응답 생성
-      const response = { success: true, message: '임시 저장 완료' };
-      
-      console.log('=== 저장 성공! ===');
-      console.log('서버 응답:', response);
-      console.log('저장된 최종 결과: [' + result + '] ' + resultNames[result]);
-      console.log('===================');
     } catch (error: any) {
       console.error('=== 결과 저장 실패! ===');
       console.error('오류 메시지:', error?.message || error);
