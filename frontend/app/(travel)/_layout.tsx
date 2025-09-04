@@ -34,7 +34,7 @@ export default function TravelLayout() {
       {/* 스택 화면 */}
       <Stack 
         screenOptions={{ headerShown: false }}
-        initialRouteName="SelectMoney"
+        initialRouteName="SelectCity"
       />
     </View>
   );

@@ -19,7 +19,7 @@ import VisibilityOff from "../../assets/images/visibility_off.svg";
 import VisibilityOn from "../../assets/images/visibility.svg";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { scaleW, scaleH, font } from "../../utils/scale";
-import { api, setToken } from "../../lib/api";
+import { api, setToken } from "../../utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
 

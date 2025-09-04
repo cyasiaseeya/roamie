@@ -6,7 +6,8 @@ import Result2 from './components/ResultTypeB';
 import Result3 from './components/ResultTypeC';
 import Result4 from './components/ResultTypeD';
 import TieResult from './components/TieResult';
-import { api, setToken } from '@/lib/api';
+import {saveSurveyResultToBackend} from './services/APIandToken';
+
 
 const SurveyResultPage = () => {
   const [resultComponent, setResultComponent] = useState<React.ReactElement | null>(null);
@@ -31,67 +32,35 @@ const SurveyResultPage = () => {
     C: '여행 중에도 편안함과 여유를 우선시하는 유형입니다. 카페, 공원, 숙소 등에서 휴식을 취하거나, 심신의 안정을 도모하는 활동을 선호합니다. 때로 활동보다는 느긋하게 쉬는 것을 더 중요하게 생각합니다.',
     D: '일정과 준비를 중시하는 체계적인 유형입니다. 여행의 모든 순간을 미리 계획하고, 시간과 동선, 상황에 따라 꼼꼼하게 움직입니다. 예상치 못한 상황에도 절차대로 차분히 대응합니다.',
   };
-
+  
   const saveResult = async (result: 'A' | 'B' | 'C' | 'D') => {
-    try {
-      const resultData = {
-        travel_type_name: resultNames[result],
-        description: resultDescriptions[result]
-      };      
-      // JWT 토큰 가져오기 (AsyncStorage에서)
-      const token = await AsyncStorage.getItem('jwt_token');
-      
-      if (token) {
-        // 토큰이 있으면 백엔드 API 호출
-        try {
-          // API 모듈에 토큰 설정
-          setToken(token);
-          
-          // 백엔드 API 호출
-          const response = await api('/profile/survey-result', {
-            method: 'POST',
-            body: JSON.stringify(resultData),
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          
+    const resultDataForBackend = {
+      travel_type_name: resultNames[result],
+      description: resultDescriptions[result],
+    };
 
-        } catch (apiError: any) {
-          // Backend save failed, continue with local storage
-        }
-      } else {
-        // No JWT token, continue with local storage only
-      }
-      // 항상 로컬에 저장 (백업용)
-      await AsyncStorage.setItem('surveyResult', JSON.stringify({
-        ...resultData,
-        travel_type: result
-      }));
-      
-      console.log('로컬 저장 완료');
-      
-    } catch (error: any) {
-      console.error('=== 결과 저장 실패! ===');
-      console.error('오류 메시지:', error?.message || error);
-      console.error('오류 전체:', error);
-      console.error('저장하려던 결과:', result, resultNames[result]);
-      console.error('API URL: /profile/survey-result');
-      console.error('==================');
-      
-      // 에러 발생 시 로컬에만 저장 (fallback)
-      try {
-        await AsyncStorage.setItem('surveyResult', JSON.stringify({
-          travel_type: result,
-          travel_type_name: resultNames[result],
-          description: resultDescriptions[result]
-        }));
-        console.log('로컬 저장 완료 (fallback)');
-      } catch (localError) {
-        console.error('로컬 저장도 실패:', localError);
-      }
+    const resultDataForLocal = {
+      ...resultDataForBackend,
+      travel_type: result,
+    };
+
+    try {
+      // 1. 분리된 백엔드 통신 함수 호출
+      await saveSurveyResultToBackend(resultDataForBackend);
+    } catch (error) {
+      // 백엔드 저장은 실패했지만, 로컬 저장은 계속 진행합니다.
+      console.log('백엔드 통신에 실패했습니다. 로컬 저장만 진행합니다.');
     }
-  }
+
+    // 2. 백엔드 저장 성공 여부와 관계없이 항상 로컬에 저장 (백업용)
+    try {
+      await AsyncStorage.setItem('surveyResult', JSON.stringify(resultDataForLocal));
+      console.log('로컬 저장이 완료되었습니다.');
+    } catch (localError) {
+      console.error('로컬 저장에도 실패했습니다:', localError);
+    }
+  };
+  
 
   const calculateAndShowResult = async () => {
     try {

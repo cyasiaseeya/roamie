@@ -10,11 +10,11 @@ type City = {
 
 type Props = {
   cities: City[];
+  selectedCityIds: number[];
+  onCityToggle: (city: City) => void;
 };
 
-export default function GenericCityList({ cities }: Props) {
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-
+export default function GenericCityList({ cities, selectedCityIds, onCityToggle }: Props) {
   return (
     <View className="flex-1 bg-white">
       <FlatList
@@ -23,8 +23,8 @@ export default function GenericCityList({ cities }: Props) {
         renderItem={({ item }) => (
           <CityItem
             name={item.name}
-            selected={selectedId === item.id}
-            onPress={() => setSelectedId(item.id)}
+            selected={selectedCityIds.includes(item.id)}
+            onPress={() => onCityToggle(item)}
           />
         )}
       />

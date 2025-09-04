@@ -1,6 +1,8 @@
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Dimensions } from 'react-native'
-import React, { useState, useRef } from 'react'
+import { Link } from 'expo-router'
+import React, { useState, useRef, useEffect } from 'react'
 import { scaleH } from '@/utils/scale'
+import { usePlanStore } from './services/usePlanStore'
 
 const { width } = Dimensions.get('window');
 
@@ -10,9 +12,20 @@ interface DateRange {
 }
 
 const SelectDate = () => {
+  const { plan, setDateRange } = usePlanStore();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedRange, setSelectedRange] = useState<DateRange>({ startDate: null, endDate: null });
   const scrollViewRef = useRef<ScrollView>(null);
+
+  // 전역 상태에서 날짜 범위 초기화
+  useEffect(() => {
+    setSelectedRange(plan.dateRange);
+  }, [plan.dateRange]);
+
+  // 선택된 날짜 범위를 전역 상태에 저장
+  useEffect(() => {
+    setDateRange(selectedRange);
+  }, [selectedRange, setDateRange]);
 
   // 월 이름 배열
   const monthNames = [
@@ -226,11 +239,13 @@ const SelectDate = () => {
       {/* 하단 버튼 */}
       {selectedRange.startDate && selectedRange.endDate && (
         <View className="bg-white px-6 py-4 border-t border-gray-200">
-          <TouchableOpacity className="bg-blue-500 py-4 rounded-xl">
-            <Text className="text-white text-center text-lg font-semibold">
-              날짜 확인
-            </Text>
-          </TouchableOpacity>
+          <Link href="/(travel)/SelectMoney" asChild>
+            <TouchableOpacity className="bg-blue-500 py-4 rounded-xl">
+              <Text className="text-white text-center text-lg font-semibold">
+                날짜 확인
+              </Text>
+            </TouchableOpacity>
+          </Link>
         </View>
       )}
     </View>
