@@ -1,10 +1,28 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Text, View, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { scaleW, scaleH, font } from "../../utils/scale"; 
+import Bus from '@/assets/images/Bus.svg';
+import Car from '@/assets/images/Car.svg';
+import Walk from '@/assets/images/Walk.svg';
+import { usePlanStore } from './services/usePlanStore';
+
+
 const SelectTransport = () => {
-  const [selectedTransport, setSelectedTransport] = useState<'car' | 'bus' | 'walk' | null>(null);
+  const { plan, setTransport } = usePlanStore();
+  const [selectedTransport, setSelectedTransport] = useState<'걷기' | '대중교통' | '운전' | null>(null);
+
+  // 전역 상태에서 교통수단 초기화
+  useEffect(() => {
+    setSelectedTransport(plan.transport);
+  }, [plan.transport]);
+
+  // 교통수단 선택 시 전역 상태에 저장
+  const handleTransportSelect = (transport: '걷기' | '대중교통' | '운전') => {
+    setSelectedTransport(transport);
+    setTransport(transport);
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-[#fafaf8]">
@@ -22,20 +40,20 @@ const SelectTransport = () => {
         {/* Transportation Options Section */}
         <View style={{ marginTop: scaleH(30), width: '100%', flexDirection: 'row', justifyContent: 'space-between' }}>
           {/* Car Option */}
-          <Pressable onPress={() => setSelectedTransport('car')} style={{ alignItems: 'center', justifyContent: 'center' }}>
-            <View style={{ width: scaleW(70), height: scaleH(70), borderRadius: scaleW(100), backgroundColor: selectedTransport === 'car' ? '#116BF4' : '#d9d9d9' }} />
+          <Pressable onPress={() => handleTransportSelect('운전')} style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ width: scaleW(70), height: scaleH(70), borderRadius: scaleW(100), backgroundColor: selectedTransport === '운전' ? '#116BF4' : '#d9d9d9' }} />
             <Text style={{ marginTop: scaleH(10), fontSize: font(22), fontWeight: '500', color: '#000' }}>자동차</Text>
           </Pressable>
           
           {/* Bus/Subway Option */}
-          <Pressable onPress={() => setSelectedTransport('bus')} style={{ alignItems: 'center', justifyContent: 'center' }}>
-            <View style={{ width: scaleW(70), height: scaleH(70), borderRadius: scaleW(100), backgroundColor: selectedTransport === 'bus' ? '#116BF4' : '#d9d9d9' }} />
+          <Pressable onPress={() => handleTransportSelect('대중교통')} style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ width: scaleW(70), height: scaleH(70), borderRadius: scaleW(100), backgroundColor: selectedTransport === '대중교통' ? '#116BF4' : '#d9d9d9' }} />
             <Text style={{ marginTop: scaleH(10), fontSize: font(22), fontWeight: '500', color: '#000' }}>대중교통</Text>
           </Pressable>
 
           {/* Walking Option */}
-          <Pressable onPress={() => setSelectedTransport('walk')} style={{ alignItems: 'center', justifyContent: 'center' }}>
-            <View style={{ width: scaleW(70), height: scaleH(70), borderRadius: scaleW(100), backgroundColor: selectedTransport === 'walk' ? '#116BF4' : '#d9d9d9' }} />
+          <Pressable onPress={() => handleTransportSelect('걷기')} style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ width: scaleW(70), height: scaleH(70), borderRadius: scaleW(100), backgroundColor: selectedTransport === '걷기' ? '#116BF4' : '#d9d9d9' }} />
             <Text style={{ marginTop: scaleH(10), fontSize: font(22), fontWeight: '500', color: '#000' }}>걷기</Text>
           </Pressable>
         </View>

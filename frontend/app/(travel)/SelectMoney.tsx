@@ -1,10 +1,35 @@
 import * as React from 'react';
-import { View, Image, Text, Pressable, TextInput } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, TextInput } from 'react-native';
+import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { scaleW, scaleH, font } from "../../utils/scale";
-import Taegeuk from '@/assets/images/Taegeuk.svg';
+import { scaleW, scaleH } from "../../utils/scale";
+import SouthKoreaFlag from '@/assets/images/South Korea.svg';
+import RoundedButton from './components/RoundedButton';
+import { usePlanStore } from './services/usePlanStore';
 
 const SelectMoney = () => {
+  const { plan, setBudget } = usePlanStore();
+  const [budget, setBudgetLocal] = useState(plan.budget.toString());
+
+  // 전역 상태에서 예산 초기화
+  useEffect(() => {
+    setBudgetLocal(plan.budget.toString());
+  }, [plan.budget]);
+
+  // 예산 변경 시 전역 상태에 저장
+  const handleBudgetChange = (value: string) => {
+    setBudgetLocal(value);
+    const numericValue = parseInt(value.replace(/,/g, '')) || 0;
+    setBudget(numericValue);
+  };
+
+  // 숫자 포맷팅 (콤마 추가)
+  const formatNumber = (value: string) => {
+    const numericValue = value.replace(/[^0-9]/g, '');
+    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 bg-white px-4">
@@ -32,9 +57,10 @@ const SelectMoney = () => {
               paddingVertical: scaleH(12),
             }}
           >
-            <Taegeuk
+            <SouthKoreaFlag
               width={scaleW(45)}
               height={scaleH(45)}
+              style={{ borderRadius: 80 }}
             />
 
             <TextInput
@@ -49,6 +75,8 @@ const SelectMoney = () => {
               keyboardType="numeric"
               returnKeyType="done"
               placeholderTextColor="#888"
+              value={formatNumber(budget)}
+              onChangeText={handleBudgetChange}
             />
             <View style={{ justifyContent: 'center', padding: scaleW(10) }}>
               <Text className="text-[16px] text-black font-semibold text-center leading-[24px]">KRW</Text>
@@ -58,16 +86,9 @@ const SelectMoney = () => {
 
         {/* '확인했습니다' Button Section */}
         <View className="absolute bottom-0 left-4 right-4" style={{ bottom: scaleH(197) }}>
-          <Pressable
-            className="bg-[#116BF4] py-3 rounded-full"
-            style={{
-              height: scaleH(48),
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <Text className="text-[17px] text-white font-semibold text-center leading-[24px]">확인했습니다</Text>
-          </Pressable>
+          <Link href="/(travel)/SelectTransport" asChild>
+            <RoundedButton title="확인했습니다" />
+          </Link>
         </View>
       </View>
     </SafeAreaView>
