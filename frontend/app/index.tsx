@@ -7,8 +7,7 @@ import React from "react";
 import SelectCity from "./(travel)/SelectCity";
 export default function App() {
  // return <FirstSurvey />; 
-  //return <FirstScreen />;
+    return <FirstScreen />;
  // return <SelectMoney />;
- return <SelectCity />;
-
+ // return <SelectCity />;
 }

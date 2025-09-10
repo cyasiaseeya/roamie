@@ -26,7 +26,7 @@ def register(body: RegisterIn):
     # username uniqueness (simple check; no fancy validation)
     exists = sb.table("users").select("id").eq("username", body.username).execute()
     if exists.data:
-        raise HTTPException(409, "Username already taken")
+        raise HTTPException(409, "이미 사용 중인 아이디입니다.")
 
     user = sb.table("users").insert({
         "username": body.username,
@@ -50,8 +50,13 @@ def register(body: RegisterIn):
 @router.post("/login")
 def login(body: LoginIn):
     sb = get_sb()
-    row = sb.table("users").select("id,username,password_hash").eq("username", body.username).single().execute()
-    if not row.data or not bcrypt.verify(body.password, row.data["password_hash"]):
-        raise HTTPException(401, "Invalid credentials")
-    token = mint_token(row.data["id"])
-    return {"token": token, "user": {"id": row.data["id"], "username": row.data["username"]}}
+    # Avoid .single() to prevent exceptions on no rows; handle not found explicitly
+    res = sb.table("users").select("id,username,password_hash").eq("username", body.username).limit(1).execute()
+    data = (res.data or [])
+    if not data:
+        raise HTTPException(401, "아이디 또는 비밀번호가 올바르지 않습니다.")
+    user_row = data[0]
+    if not user_row.get("password_hash") or not bcrypt.verify(body.password, user_row["password_hash"]):
+        raise HTTPException(401, "아이디 또는 비밀번호가 올바르지 않습니다.")
+    token = mint_token(user_row["id"])
+    return {"token": token, "user": {"id": user_row["id"], "username": user_row["username"]}}
