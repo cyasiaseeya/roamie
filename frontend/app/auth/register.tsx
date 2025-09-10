@@ -92,8 +92,12 @@ const Component = () => {
     setPasswordError(validatePassword(value));
   };
 
+  const [submitting, setSubmitting] = useState(false);
+
   // 폼 제출
   const onSubmit = async () => {
+    if (submitting) return;
+    console.log('[register] submit pressed');
     // 최종 유효성 검사
     const usernameErr = validateUsername(username);
     const passwordErr = validatePassword(password);
@@ -112,6 +116,7 @@ const Component = () => {
     }
     
     try {
+      setSubmitting(true);
       const body = {
         username,
         password,
@@ -130,7 +135,12 @@ const Component = () => {
       
       router.replace("/profile/ProfilePhotoScreen");
     } catch (e: any) {
-      Alert.alert("회원가입 실패", e?.message ?? String(e));
+      console.warn('[register] error', e?.status, e?.message || e);
+      const msg = e?.message || '회원가입 중 오류가 발생했습니다.';
+      Alert.alert("회원가입 실패", typeof msg === 'string' ? msg : JSON.stringify(msg));
+    }
+    finally {
+      setSubmitting(false);
     }
   };
 
@@ -283,11 +293,12 @@ const Component = () => {
 
         {/* 회원가입 버튼 */}
         <TouchableOpacity
-          style={styles.button}
+          style={[styles.button, submitting && { opacity: 0.6 }]}
           onPress={onSubmit}
           activeOpacity={0.9}
+          disabled={submitting}
         >
-          <Text style={styles.labelText}>회원가입</Text>
+          <Text style={styles.labelText}>{submitting ? '가입 중...' : '회원가입'}</Text>
         </TouchableOpacity>
       </View>
 

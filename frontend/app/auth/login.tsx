@@ -12,10 +12,38 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from "expo-router";
 import { GoogleIcon, KakaoIcon } from "../../component/Icons";
 import { scaleW, scaleH, font } from "../../utils/scale";
+import { api, setToken } from "../../utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LoginScreen = () => {
   const [id, setId] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const handleLogin = async () => {
+    if (submitting) return;
+    setError(null);
+    setSubmitting(true);
+    try {
+      const res = await api("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ username: id, password }),
+      });
+      setToken(res.token);
+      try { await AsyncStorage.setItem('jwt_token', res.token); } catch {}
+      router.replace("/MainPage");
+    } catch (e: any) {
+      if (e?.status === 401) {
+        setError("아이디 또는 비밀번호가 올바르지 않습니다.");
+      } else {
+        const message = e?.message || "로그인 중 오류가 발생했습니다.";
+        setError(typeof message === "string" ? message : JSON.stringify(message));
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -69,10 +97,15 @@ const LoginScreen = () => {
         {/* 로그인 버튼 */}
         <TouchableOpacity 
           style={styles.button}
-          //onPress={() => router.push("/main")}
+          onPress={handleLogin}
+          disabled={submitting}
         >
-          <Text style={styles.buttonText}>로그인</Text>
+          <Text style={styles.buttonText}>{submitting ? "로그인 중..." : "로그인"}</Text>
         </TouchableOpacity>
+
+        {error ? (
+          <Text style={{ color: "#fff", marginTop: scaleH(12) }}>{error}</Text>
+        ) : null}
       </View>
 
       {/* 하단 영역 - 소셜 로그인과 회원가입 */}

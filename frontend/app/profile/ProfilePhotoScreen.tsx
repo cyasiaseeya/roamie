@@ -5,13 +5,13 @@ import {
   View,
   Image,
   TouchableOpacity,
-  Dimensions,
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { pickFromLibrary, takePhoto, type PhotoAsset } from "./Component/Photopicker";
 import { scaleW, scaleH, font } from "../../utils/scale";
+import { api } from "../../utils/api";
 
 // 이동할 경로 (실제 파일 경로에 맞게 조정 가능)
 const NEXT_PATH = "/(survey)/survey1";
@@ -20,6 +20,8 @@ const NEXT_PATH = "/(survey)/survey1";
 const Component = () => {
   const router = useRouter();
   const [photo, setPhoto] = React.useState<PhotoAsset | null>(null);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
 
   const goNext = React.useCallback(
     (uri?: string) => {
@@ -32,12 +34,12 @@ const Component = () => {
 
   const onUploadPress = React.useCallback(async () => {
     try {
+      setErrorMsg(null);
       const res = await pickFromLibrary();
       console.log("[pickFromLibrary] result:", res);
       const uri = (res as any)?.uri || (res as any)?.assets?.[0]?.uri; // 방어적 접근
       if (uri) {
         setPhoto({ ...(res as any), uri });
-        goNext(uri);
       } else {
         Alert.alert("알림", "유효한 사진을 찾지 못했어요.");
       }
@@ -45,24 +47,57 @@ const Component = () => {
       console.warn(e);
       Alert.alert("알림", "사진을 불러오는 중 오류가 발생했어요.");
     }
-  }, [goNext]);
+  }, []);
 
   const onTakePress = React.useCallback(async () => {
     try {
+      setErrorMsg(null);
       const res = await takePhoto();
       console.log("[takePhoto] result:", res);
       const uri = (res as any)?.uri || (res as any)?.assets?.[0]?.uri; // 방어적 접근
       if (uri) {
         setPhoto({ ...(res as any), uri });
-        goNext(uri);
       } else {
         Alert.alert("알림", "유효한 사진을 찾지 못했어요.");
       }
     } catch (e) {
       console.warn(e);
-      Alert.alert("알림", "사진을 촬영하는 중 오류가 발생했어요.");
+      Alert.alert("알림", "사진을 불러오는 중 오류가 발생했어요.");
     }
-  }, [goNext]);
+  }, []);
+
+  const onSubmitPress = React.useCallback(async () => {
+    if (!photo?.uri) {
+      Alert.alert("알림", "먼저 사진을 선택하거나 촬영해주세요.");
+      return;
+    }
+    try {
+      setSubmitting(true);
+      setErrorMsg(null);
+      console.log("[avatar] start", {
+        uri: photo.uri,
+        type: (photo as any)?.type,
+      });
+      const form = new FormData();
+      const mime = (photo as any)?.type || "image/jpeg";
+      const filename = mime === "image/png" ? "avatar.png" : mime === "image/webp" ? "avatar.webp" : "avatar.jpg";
+      form.append("file", {
+        uri: photo.uri,
+        name: filename,
+        type: mime,
+      } as any);
+      const res = await api("/profile/avatar", { method: "POST", body: form }, { timeoutMs: 45000 });
+      console.log("[avatar] server response", res);
+      goNext(photo.uri);
+    } catch (e: any) {
+      console.warn("[avatar upload] error:", e?.status, e?.body || e);
+      const msg = e?.body || e?.message || "사진을 업로드하는 중 오류가 발생했어요.";
+      setErrorMsg(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      Alert.alert("업로드 실패", typeof msg === 'string' ? msg : JSON.stringify(msg));
+    } finally {
+      setSubmitting(false);
+    }
+  }, [photo, goNext]);
 
   const onSkipPress = React.useCallback(() => {
     // 스킵: 사진 없이 바로 이동
@@ -112,7 +147,25 @@ const Component = () => {
                 새 사진 찍기
               </Text>
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.button,
+                styles.buttonSubmit,
+                (!photo || submitting) && styles.buttonDisabled,
+              ]}
+              onPress={onSubmitPress}
+              activeOpacity={0.9}
+              disabled={!photo || submitting}
+            >
+              <Text style={[styles.buttonText, styles.buttonSubmitText]}>
+                {submitting ? "업로드 중..." : "제출하기"}
+              </Text>
+            </TouchableOpacity>
           </View>
+          {errorMsg ? (
+            <Text style={styles.error}>{errorMsg}</Text>
+          ) : null}
         </View>
 
         {/* 하단 Safe Area(“맨밑의 상자도 safe area”) + 스킵 */}
@@ -174,7 +227,17 @@ const styles = StyleSheet.create({
   buttonPrimaryText: { color: "#007AFF", fontWeight: "600" },
   buttonGhost: { backgroundColor: "#111827" },
   buttonGhostText: { color: "#F2F2F7", fontWeight: "600" },
+  buttonSubmit: { backgroundColor: "#007AFF" },
+  buttonSubmitText: { color: "#FFFFFF", fontWeight: "700" },
+  buttonDisabled: { opacity: 0.6 },
   buttonText: { fontFamily: "Pretendard", fontSize: font(16), lineHeight: font(22) },
+  error: {
+    marginTop: scaleH(6),
+    color: "#FF3B30",
+    fontFamily: "Pretendard",
+    fontSize: font(12),
+    textAlign: "center",
+  },
 
   // 하단 Safe Area + 스킵
   footer: { paddingBottom: scaleH(12), alignItems: "center" },
